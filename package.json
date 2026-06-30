@@ -1,0 +1,157 @@
+# 🛡️ Backend KPI Dashboard — Barakatak
+
+Backend sederhana (Express.js) untuk menyimpan data dashboard secara terpusat,
+supaya semua orang yang akses dashboard melihat data yang sama, real-time.
+
+Tidak pakai JSONBin atau layanan pihak ketiga lain — ini backend milikmu sendiri.
+
+---
+
+## 📦 Isi Folder
+
+```
+barakatak-backend/
+├── server.js          ← kode utama backend
+├── package.json       ← daftar dependency
+├── .env.example        ← contoh konfigurasi (opsional API key)
+├── .gitignore
+└── data/
+    └── store.json      ← (otomatis dibuat saat pertama kali jalan)
+```
+
+---
+
+## 🚀 Cara Deploy ke Render.com (GRATIS)
+
+Render adalah hosting backend gratis yang paling mudah dipakai. Ikuti langkah ini:
+
+### 1. Push folder ini ke GitHub
+
+1. Buat repo baru di [github.com/new](https://github.com/new), nama misal `barakatak-backend`
+2. Upload semua isi folder `barakatak-backend` ke repo itu
+   - Cara mudah: di halaman repo GitHub, klik **"uploading an existing file"** → drag semua file (kecuali folder `node_modules` kalau ada)
+
+### 2. Daftar/login ke Render
+
+1. Buka [render.com](https://render.com) → Sign Up (bisa pakai akun GitHub langsung)
+2. Di dashboard, klik **New +** → **Web Service**
+3. Pilih **Build and deploy from a Git repository**
+4. Connect ke repo GitHub `barakatak-backend` yang baru kamu buat
+
+### 3. Isi konfigurasi deploy
+
+| Field | Isi |
+|---|---|
+| **Name** | `barakatak-backend` (atau bebas) |
+| **Region** | Singapore (paling dekat ke Indonesia) |
+| **Branch** | `main` |
+| **Root Directory** | (kosongkan) |
+| **Build Command** | `npm install` |
+| **Start Command** | `node server.js` |
+| **Instance Type** | **Free** |
+
+5. Klik **Create Web Service**
+6. Tunggu proses build (~2-3 menit)
+7. Setelah selesai, kamu akan dapat URL seperti:
+   ```
+   https://barakatak-backend.onrender.com
+   ```
+
+### 4. Tes backend
+
+Buka URL itu di browser. Kalau muncul:
+```json
+{"status":"ok","message":"Barakatak KPI Backend berjalan 🎉", ...}
+```
+Berarti backend sudah hidup! 🎉
+
+---
+
+## 🔗 Hubungkan ke Frontend Dashboard
+
+1. Salin URL backend kamu (mis. `https://barakatak-backend.onrender.com`)
+2. Buka file `js/sync.js` di folder dashboard frontend
+3. Ganti baris:
+   ```javascript
+   const API_BASE_URL = "GANTI_DENGAN_URL_BACKEND_KAMU";
+   ```
+   menjadi:
+   ```javascript
+   const API_BASE_URL = "https://barakatak-backend.onrender.com";
+   ```
+4. Re-upload folder frontend ke Netlify
+
+Selesai! Semua device yang buka dashboard akan tersinkron lewat backend ini.
+
+---
+
+## ⚠️ Catatan Penting: Render Free Tier "Sleep"
+
+Render free tier akan **tidur otomatis** kalau tidak ada traffic selama 15 menit,
+dan butuh ~30-50 detik untuk bangun lagi saat diakses pertama kali setelah tidur.
+
+**Dampaknya:** Loading pertama kali bisa terasa lambat, tapi setelah itu normal.
+
+**Solusi (opsional):** kalau mau backend selalu standby, bisa:
+- Upgrade ke paid tier Render (~$7/bulan), atau
+- Pakai layanan ping otomatis gratis seperti [cron-job.org](https://cron-job.org) untuk ping URL backend setiap 10 menit agar tidak tidur
+
+---
+
+## 🔒 Keamanan (Opsional)
+
+Backend ini secara default **bisa diakses siapa saja** yang tahu URL-nya (tanpa password),
+supaya gampang untuk setup pemula. Kalau mau lebih aman:
+
+1. Buat file `.env` di folder backend (salin dari `.env.example`)
+2. Isi:
+   ```
+   API_KEY=isi-dengan-password-rahasia-kamu
+   ```
+3. Di Render dashboard → Environment → tambahkan environment variable `API_KEY` dengan value yang sama
+4. Di frontend `js/sync.js`, isi juga:
+   ```javascript
+   const API_KEY = "isi-dengan-password-rahasia-yang-sama";
+   ```
+
+Kalau `API_KEY` diisi, backend akan menolak request yang tidak menyertakan key yang benar.
+
+---
+
+## 🛠️ Menjalankan Lokal (untuk testing, opsional)
+
+Kalau punya Node.js terinstall di komputer:
+
+```bash
+cd barakatak-backend
+npm install
+npm start
+```
+
+Backend akan jalan di `http://localhost:3001`
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Fungsi |
+|---|---|---|
+| GET | `/` | Cek backend hidup |
+| GET | `/api/data` | Ambil semua data dashboard |
+| PUT | `/api/data` | Simpan/replace semua data dashboard |
+| POST | `/api/reset` | Reset data ke default (hati-hati, akan menghapus semua data!) |
+
+---
+
+## 💾 Tentang Penyimpanan Data
+
+Data disimpan di file `data/store.json` di server. Ini sederhana dan cukup untuk
+kebutuhan dashboard kepanitiaan, tapi **bukan database production-grade**.
+
+⚠️ **Render free tier punya disk yang tidak persisten** — artinya kalau service
+di-restart/redeploy, file `data/store.json` bisa hilang dan kembali ke default.
+
+**Untuk keamanan data jangka panjang, disarankan:**
+- Backup data secara berkala (klik tombol export jika ada di dashboard), atau
+- Upgrade ke database seperti PostgreSQL gratis di Render/Railway/Supabase
+  (kalau butuh ini, kasih tahu saya, nanti saya bantu upgrade backend-nya)
